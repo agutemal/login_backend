@@ -22,8 +22,7 @@ namespace login_backend.Controllers
         {
             // Paso 1: ASP.NET Core ya validó automáticamente los [Required]
             // del DTO antes de llegar aquí (gracias a [ApiController]).
-            // Si algo falta, el cliente ya recibió un 400 sin que este código se ejecute.
-
+            // Si algo falta, el cliente ya recibió un 400 sin que este código se ejecute
             // Paso 2: Delegar toda la lógica de negocio al AuthService
             var resultado = await _authService.LoginAsync(request);
 
@@ -39,6 +38,26 @@ namespace login_backend.Controllers
             if (!resultado.Success)
             {
                 return Unauthorized(response); // 401
+            }
+
+            return Ok(response); // 200
+        }
+        // POST: api/auth/register
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+        {
+            var resultado = await _authService.RegisterAsync(request);
+
+            var response = new LoginResponseDto
+            {
+                Success = resultado.Success,
+                Token = resultado.Token,
+                Menssaje = resultado.ErrorMessage
+            };
+
+            if (!resultado.Success)
+            {
+                return BadRequest(response); // 400 (ej. correo ya registrado)
             }
 
             return Ok(response); // 200
