@@ -6,5 +6,6 @@ namespace login_backend.Repositories
     {
         Task<User> GetByEmail(string email);
         Task AddAsync(User user);
+        Task<List<User>> GetAllUser();
     }
 }

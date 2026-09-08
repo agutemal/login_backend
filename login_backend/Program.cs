@@ -15,6 +15,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Paso 2 Autenticacion JWT: Leer la configuración Jwt (misma que usa JwtService para generar el token)
 var jwtKey = builder.Configuration["Jwt:Key"]!;

@@ -1,5 +1,6 @@
 ﻿using login_backend.Dtos;
 using login_backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +11,12 @@ namespace login_backend.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IUserService _userService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IUserService userService)
         {
             _authService = authService;
+            _userService = userService;
         }
 
         // POST: api/auth/login
@@ -62,6 +65,12 @@ namespace login_backend.Controllers
 
             return Ok(response); // 200
         }
-
+        [Authorize]
+        [HttpGet("getalluser")]
+        public async Task<IActionResult> getalluser()
+        {
+            var usuarios = await _userService.GetAllAsync();
+            return Ok(usuarios);
+        }
     }
 }

@@ -18,6 +18,11 @@ namespace login_backend.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == correo);
         }
 
+        public async Task<List<User>> GetAllUser()
+        {
+            return await _context.Users.ToListAsync();
+        }
+
         // Guarda un nuevo usuario en la base de datos
         public async Task AddAsync(User user)
         {
