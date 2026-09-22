@@ -1,4 +1,4 @@
-using login_backend.Db;
+Ôªøusing login_backend.Db;
 using login_backend.Repositories;
 using login_backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,30 +11,40 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-//Paso 1 Autentication JWT: ConfiguraciÛn Jwt que usa JwtService para generar el token
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+//Paso 1 Autentication JWT: Configuraci√≥n Jwt que usa JwtService para generar el token
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Paso 2 Autenticacion JWT: Leer la configuraciÛn Jwt (misma que usa JwtService para generar el token)
+// Paso 2 Autenticacion JWT: Leer la configuraci√≥n Jwt (misma que usa JwtService para generar el token)
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-// Paso 3 Autentication JWT: Registrar el esquema de autenticaciÛn JWT Bearer
+// Paso 3 Autentication JWT: Registrar el esquema de autenticaci√≥n JWT Bearer
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    // Paso 4: Definir C”MO se valida el token recibido en cada peticiÛn
+    // Paso 4: Definir C√ìMO se valida el token recibido en cada petici√≥n
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidateLifetime = true,       // rechaza el token si ya expirÛ
+        ValidateLifetime = true,       // rechaza el token si ya expir√≥
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtIssuer,
         ValidAudience = jwtAudience,
@@ -46,7 +56,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         connectionString,
-        ServerVersion.AutoDetect(connectionString) // detecta autom·ticamente la versiÛn de tu MySQL
+        ServerVersion.AutoDetect(connectionString) // detecta autom√°ticamente la versi√≥n de tu MySQL
     ));
 
 builder.Services.AddControllers();
@@ -61,7 +71,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// Solo forzar HTTPS fuera de desarrollo
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseCors("FrontendDev"); // ‚Üê CORS antes de Authentication/Authorization
+
 // Paso 4: IMPORTANTE - Authentication SIEMPRE antes de Authorization
 app.UseAuthentication();
 app.UseAuthorization();
