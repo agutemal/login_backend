@@ -21,9 +21,7 @@ namespace login_backend.Models
         [Column("pass_word")]
         [StringLength(100)]
         public string Password { get; set; }
-        [Required]
         [Column("fecha_registro")]
-        [StringLength(100)]
         public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
     }
 }
